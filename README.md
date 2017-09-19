@@ -1,1 +1,2 @@
-https://github.com/AliSumer-Git/SEAOC-Seismic-Design-Maps
+Seismic Maps
+[https://manrajsingh.github.io/seismic-maps/]
