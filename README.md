@@ -1,2 +1,1 @@
-# SEAOC-Seismic-Design-Maps
-SEAOC Seismic Design Maps
+https://github.com/AliSumer-Git/SEAOC-Seismic-Design-Maps
