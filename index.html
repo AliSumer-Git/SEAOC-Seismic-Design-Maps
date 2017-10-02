@@ -140,6 +140,7 @@
             </div>
         </div>
         &nbsp;
+       
         <div class="row">
           <div class="input-group col-12">
             <input type="text" class="form-control input-group searchbox" placeholder="Search Address or Lat,Long" aria-label="Search for...">
@@ -151,6 +152,12 @@
       </div>
       
       
+      
+
+      
+      <!-- Results -->
+      <div id="result"></div>
+
       <button onclick="myFunction()">Print this page</button>
 
       <script>
@@ -158,11 +165,7 @@
       window.print();
       }
       </script>
-
       
-      <!-- Results -->
-      <div id="result"></div>
-
       <script id="result-template" type="text/x-handlebars-template">
         <div class="card mt-5">
           <div class="card-body">
