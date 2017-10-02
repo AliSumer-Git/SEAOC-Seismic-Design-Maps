@@ -398,3 +398,4 @@ function make_chart(elm,chartData,chartTitle)
   }
 
 }
+
