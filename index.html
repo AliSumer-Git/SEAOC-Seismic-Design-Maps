@@ -120,8 +120,6 @@
               <select class="form-control" aria-describedby="btnGroupAddon" id="dcrd">
                 <option value="asce7-16">ASCE 7-16</option>
                 <option value="asce7-10">ASCE 7-10</option>
-                <option value="asce7-05">ASCE 7-05</option>
-                
               </select>
             </div>
             <div class="input-group col-md-4">
@@ -140,7 +138,6 @@
             </div>
         </div>
         &nbsp;
-       
         <div class="row">
           <div class="input-group col-12">
             <input type="text" class="form-control input-group searchbox" placeholder="Search Address or Lat,Long" aria-label="Search for...">
@@ -150,22 +147,18 @@
           </div>
         </div>
       </div>
-      
-      
-      
-
-      
       <!-- Results -->
+      
+      <button onclick="myPrint()">Print this page</button>
+
+<script>
+function myPrint() {
+    window.print();
+}
+</script>
+      
       <div id="result"></div>
 
-      <button onclick="myFunction()">Print this page</button>
-
-      <script>
-      function myFunction() {
-      window.print();
-      }
-      </script>
-      
       <script id="result-template" type="text/x-handlebars-template">
         <div class="card mt-5">
           <div class="card-body">
@@ -270,7 +263,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.10/handlebars.min.js"></script>
     <script src="js/app.js"></script>
     <!-- Optional JavaScript -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9eSweDW0j_CV_lCFFpa-_3-SUgTw3L7w&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSDT8WeSFn_3dLYBo5cTq6sUOQVE4o2Gg&callback=initMap" async defer></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
   </body>
