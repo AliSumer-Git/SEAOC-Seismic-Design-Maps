@@ -113,9 +113,64 @@ var styles = {
           }
         ]};
 
+(function(options){ 
+  
+  if(typeof options === 'undefined'){
+    options = {
+      siteClassSelector: "#site-class",
+      referenceDocumentSelector: "#dcrd"
+    }
+  }
+  else{
+    options.siteClassSelector = (typeof options.siteClassSelector === undefined || options.siteClassSelector == null || options.siteClassSelector == '')?'#site-class':options.siteClassSelector;
+    options.referenceDocumentSelector = (typeof options.referenceDocumentSelector === undefined || options.referenceDocumentSelector == null || options.referenceDocumentSelector == '')?'#dcrd':options.referenceDocumentSelector;
+
+  }
+
+  siteClasses = [
+    { name: 'A - Hard Rock', value: 'A' },
+    { name: 'B - Rock', value: 'B' },
+    { name: 'B - Estimated (see Section 11.4.3)', value: 'B-estimated', hide_in_ref: ['asce7-10'] },
+    { name: 'C - Very Dense Soil and Soft Rock', value: 'C' },
+    { name: 'D - Stiff Soil', value: 'D' },
+    { name: 'D - Default (See Section 11.4.3)', value: 'D-default', hide_in_ref: ['asce7-10'] },
+    { name: 'E - Soft Clay Soil', value: 'E' },
+    { name: 'F - Site Response Analysis', value: 'F' }
+  ];
+
+  var update_view = function(){
+    selector = options.siteClassSelector;
+    ref = $(options.referenceDocumentSelector).val();
+
+    $(selector + " option").remove();
+    siteClasses.forEach(function(i) {
+      if(typeof i.hide_in_ref == 'undefined'){
+        $(selector).append('<option value="'+i.value+'">'+i.name+'</option>');
+      }
+      else{
+        if(i.hide_in_ref.indexOf(ref) == -1){
+          $(selector).append('<option value="'+i.value+'">'+i.name+'</option>');
+        }
+      }
+    });
+    $(selector + ' option[value="D"]').prop('selected', true);
+  };
+
+  //listners
+  $(options.referenceDocumentSelector).change(function (){
+    update_view();
+  });
+  $(document).ready(function(){
+    update_view();
+  });
+})();
+
+
+
 $(".searchbox").keyup(function(e){
   $(".searchbox").val($(this).val());
 });
+
 
 function initMap() {
   // Create the map with no initial style specified.
@@ -125,18 +180,35 @@ function initMap() {
     zoom: 16,
     mapTypeControl: false
   });
-
+ 
   map.setOptions({styles: styles['retro']});
   var geocoder = new google.maps.Geocoder();
-  var searchMarker = new google.maps.Marker({ map: map, animation: google.maps.Animation.DROP, draggable: true, });
+  
+  $('<div/>').addClass('centerMarker').appendTo(map.getDiv())
+
+  map_dragged = false;
+
+  google.maps.event.addListener(map, 'drag', function() {
+    $("#coords-display").html("Lat: " + map.getCenter().lat().toFixed(8) +", Lng: " + map.getCenter().lng().toFixed(8));
+    map_dragged = true;
+  });
+
+  google.maps.event.addListener(map, 'idle', function() {
+    $("#coords-display").html("Lat: " + map.getCenter().lat().toFixed(8) +", Lng: " + map.getCenter().lng().toFixed(8));
+    if(map_dragged){
+      $(".searchbox").val(map.getCenter().lat().toFixed(8) + ", " + map.getCenter().lng().toFixed(8));
+      map_dragged = false;
+    }
+  });
+ 
 
   $('.searchbutton').click(function() {
-    geocodeAddress(geocoder, map, searchMarker);
+    geocodeAddress(geocoder, map);
   });
   $('.searchbox').keypress(function(e) {
     var key = e.which || e.keyCode;
     if (key === 13) {
-      geocodeAddress(geocoder, map, searchMarker);
+      geocodeAddress(geocoder, map);
     }
   });
 }
@@ -149,7 +221,7 @@ function clearErrorNotifications(){
   $(".alerts-container > .alert-danger").remove();
 }
 
-function geocodeAddress(geocoder, resultsMap, searchMarker) {
+function geocodeAddress(geocoder, resultsMap) {
   clearErrorNotifications(); 
   $("#result").html('').hide();
   var address = $(".searchbox").val();
@@ -162,34 +234,55 @@ function geocodeAddress(geocoder, resultsMap, searchMarker) {
   }
   if($("#site-class").val() == 'F'){
     error_title = "Site Class: F";
-    error_message = "A site response analysis shall be performed in accordance with ASCE/SEI 7-16 section 21.1 for structures on Site Class F sites. If your structure is exempted under ASCE/SEI 7-16 Section 20.3.1, select a substitute site class.";
+    error_message = "A site response analysis shall be performed in accordance with ASCE/SEI 7 section 21.1 for structures on Site Class F sites. If your structure is exempted under ASCE/SEI 7 Section 20.3.1, select a substitute site class.";
     displayErrorNotification(error_title, error_message);
     return; 
   }
-
 
   $("#result").html('<div style="text-align:center; margin-top:20px;"><img src="https://loading.io/spinners/hourglass/lg.sandglass-time-loading-gif.gif"></div>').show();
   $(".searchbox,.searchbutton").attr("disabled","disabled");
   $(".searchbutton").html("Searching ... ");
 
-  geocoder.geocode({'address': address}, function(results, status) {
-    if (status === 'OK') {
-      resultsMap.setCenter(results[0].geometry.location);
-      searchMarker.setPosition(results[0].geometry.location);
+  if(address.search(/[a-zA-Z]/) < 0 && address.search(",") > 0 ){
+    //Input is lat lng
+    addressParts = address.split(',');
+    lat = addressParts[0].trim();
+    lng = addressParts[1].trim();
+    formatted_address = "";
+    map.setCenter({'lat': parseFloat(lat), 'lng': parseFloat(lng) });
+    usgs_seismic_info(lat, lng, formatted_address);
+  }
+  else
+  {
+    geocoder.geocode({'address': address}, function(results, status) {
+      if (status === 'OK') {
+        resultsMap.setCenter(results[0].geometry.location);
+        lat = results[0].geometry.location.lat();
+        lng = results[0].geometry.location.lng();
+        usgs_seismic_info(lat, lng, results[0].formatted_address);
 
-      lat = results[0].geometry.location.lat();
-      lng = results[0].geometry.location.lng();
+      }
+      else {
+        displayErrorNotification('Geocode was not successful for the following reason: ', status);
+        $(".searchbox,.searchbutton").removeAttr("disabled");
+        $(".searchbutton").html("Search");
+      }
+    });
+  }
+}
 
-      riskCategory = $("#risk-category").val();
-      siteClass = $("#site-class").val();
-      $.ajax({
+function usgs_seismic_info(lat, lng, formatted_address){
+  dcrd = $("#dcrd").val();
+  riskCategory = $("#risk-category").val();
+  siteClass = $("#site-class").val();
+  $.ajax({
         method: 'GET',
         dataType: 'json',
-        url: 'https://earthquake.usgs.gov/ws/designmaps/asce7-16.json',
+        url: 'https://earthquake.usgs.gov/ws/designmaps/'+ dcrd +'.json',
         data: {latitude:lat, longitude: lng, riskCategory: riskCategory, siteClass: siteClass, title: "Seismic Maps"},
         success: function(data){
           if(data.request.status == "success"){
-            displayInfo(results[0],data);
+            displayInfo(lat, lng, formatted_address, data);
           }
           else{
              displayErrorNotification("USGS service returned the following error", data.response);
@@ -204,30 +297,21 @@ function geocodeAddress(geocoder, resultsMap, searchMarker) {
           $(".searchbutton").html("Search");
         },
       });
-
-    } else {
-      displayErrorNotification('Geocode was not successful for the following reason: ', status);
-      $(".searchbox,.searchbutton").removeAttr("disabled");
-      $(".searchbutton").html("Search");
-    }
-  });
 }
 
 
-function displayInfo(goog,usgs){
+function displayInfo(lat,lng,formatted_address, usgs){
   usgsDate = new Date(usgs.request.date);
-
-  lat = goog.geometry.location.lat();
-  lng = goog.geometry.location.lng();
   result_count =  $("#result > div").length;
   source = $("#result-template").html();
   template = Handlebars.compile(source);
   context = {
+    dcrd: usgs.request.referenceDocument,
     riskCategory: usgs.request.parameters.riskCategory,
     siteClass: usgs.request.parameters.siteClass,
-    dateTime: usgsDate.toLocaleDateString() + " " + usgsDate.toLocaleTimeString(),
+    dateTime: usgsDate.toLocaleDateString() + ", " + usgsDate.toLocaleTimeString(),
     result_count: result_count,
-    formatted_address: goog.formatted_address,
+    formatted_address: formatted_address,
     latlng: lat + ", " + lng,
     ss: usgs.response.data.ss,
     s1: usgs.response.data.s1,
@@ -249,6 +333,12 @@ function displayInfo(goog,usgs){
     ssuh: usgs.response.data.ssuh,
     ssd: usgs.response.data.ssd
   };
+
+  $("#site-class option").each( function() {
+    if($(this).val() == usgs.request.parameters.siteClass) {
+      context.siteClass = $(this).html();
+    }
+  });
 
   for(key in usgs.response.data)
   {
@@ -291,22 +381,20 @@ function displayInfo(goog,usgs){
 
 function make_chart(elm,chartData,chartTitle)
 {
-      google.charts.load('current', {'packages':['corechart','line']});
-      google.charts.setOnLoadCallback(drawChart);
+  google.charts.load('current', {'packages':['corechart','line']});
+  google.charts.setOnLoadCallback(drawChart);
 
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable(chartData);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable(chartData);
+    var options = {
+      title: chartTitle,
+      vAxis: { title: 'Sa(g)'},
+      hAxis : {title: 'Period, T (sec)'},
+      legend: {'position': 'bottom' }
+    };
 
-        var options = {
-          title: chartTitle,
-          vAxis: { title: 'Sa(g)'},
-          hAxis : {title: 'Period, T (sec)'},
-          legend: {'position': 'bottom' }
-        };
-
-        var chart = new google.visualization.LineChart(document.getElementById(elm));
-
-        chart.draw(data, options);
-      }
+    var chart = new google.visualization.LineChart(document.getElementById(elm));
+    chart.draw(data, options);
+  }
 
 }
