@@ -64,6 +64,44 @@
     }
     </style>
   </head>
+	
+	
+	
+	
+//------------ ... 	
+	
+	
+	<div id="imprimir">
+    <h1><?php echo $direccion;?></h1>
+    <div id="distancia"></div>
+    <div id="map-canvas" style="margin: 0;padding: 0; height: 550px;z-index:10"></div>                          
+    <div id="captura" style="position:absolute;top:100px;left:50px;"></div>
+</div>
+//------------ ... 
+
+	
+	
+	
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9eSweDW0j_CV_lCFFpa-_3-SUgTw3L7w&callback=initMap" async defer></script>
+//------------ ...
+<script>
+    html2canvas($("#imprimir"), {
+        onrendered: function(canvas) {
+            $("#captura").html(canvas);                                        
+        }
+    });            
+</script>
+//------------ ...	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container">
