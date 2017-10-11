@@ -127,34 +127,28 @@ var styles = {
 
   }
 
-  var hide_in_ref = ["asce7-10", "ibc-2015","ibc-2012", "nehrp-2009"]
-    
   siteClasses = [
     { name: 'A - Hard Rock', value: 'A' },
     { name: 'B - Rock', value: 'B' },
-    { name: 'B - Estimated (see Section 11.4.3)', value: 'B-estimated', hide_in_ref[] },
+    { name: 'B - Estimated (see Section 11.4.3)', value: 'B-estimated', hide_in_ref: ['asce7-10'] },
     { name: 'C - Very Dense Soil and Soft Rock', value: 'C' },
     { name: 'D - Stiff Soil', value: 'D' },
-    { name: 'D - Default (See Section 11.4.3)', value: 'D-default', hide_in_ref[]},
+    { name: 'D - Default (See Section 11.4.3)', value: 'D-default', hide_in_ref: ['asce7-10'] },
     { name: 'E - Soft Clay Soil', value: 'E' },
     { name: 'F - Site Response Analysis', value: 'F' }
   ];
-  
 
-  
-  
-  
   var update_view = function(){
     selector = options.siteClassSelector;
     ref = $(options.referenceDocumentSelector).val();
 
     $(selector + " option").remove();
     siteClasses.forEach(function(i) {
-      if(typeof i.hide_in_ref[] == 'undefined'){
+      if(typeof i.hide_in_ref == 'undefined'){
         $(selector).append('<option value="'+i.value+'">'+i.name+'</option>');
       }
       else{
-        if(i.hide_in_ref[].indexOf(ref) == -1){
+        if(i.hide_in_ref.indexOf(ref) == -1){
           $(selector).append('<option value="'+i.value+'">'+i.name+'</option>');
         }
       }
@@ -308,7 +302,6 @@ function usgs_seismic_info(lat, lng, formatted_address){
 
 function displayInfo(lat,lng,formatted_address, usgs){
   usgsDate = new Date(usgs.request.date);
-  result_count =  $("#result > div").length;
   source = $("#result-template").html();
   template = Handlebars.compile(source);
   context = {
@@ -316,7 +309,6 @@ function displayInfo(lat,lng,formatted_address, usgs){
     riskCategory: usgs.request.parameters.riskCategory,
     siteClass: usgs.request.parameters.siteClass,
     dateTime: usgsDate.toLocaleDateString() + ", " + usgsDate.toLocaleTimeString(),
-    result_count: result_count,
     formatted_address: formatted_address,
     latlng: lat + ", " + lng,
     ss: usgs.response.data.ss,
@@ -370,11 +362,11 @@ function displayInfo(lat,lng,formatted_address, usgs){
 
   if(usgs.response.data.sdSpectrum != null){
     sd_data = [["Period, T(sec)", "Sa(g)"]].concat(usgs.response.data.sdSpectrum);
-    make_chart("sd_chart_" + result_count, sd_data, "Design Response Spectrum");
+    make_chart("sd_chart", sd_data, "Design Response Spectrum");
   }
   if(usgs.response.data.smSpectrum != null){
     sm_data = [["Period, T(sec)", "Sa(g)"]].concat(usgs.response.data.smSpectrum);
-    make_chart("sm_chart_" + result_count, sm_data, "MCER Response Spectrum");
+    make_chart("sm_chart", sm_data, "MCER Response Spectrum");
   }
   if(usgs.response.data.smSpectrum == null && usgs.response.data.sdSpectrum == null) {
     $(".spectrum-charts").hide();
