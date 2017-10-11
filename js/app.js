@@ -127,7 +127,7 @@ var styles = {
 
   }
 
-  var hide_in_ref = ["asce7-10", "nehrp-2009", "ibc-2015","ibc-2012"]
+  var hide_in_ref = ["asce7-10", "ibc-2015","ibc-2012", "nehrp-2009"]
     
   siteClasses = [
     { name: 'A - Hard Rock', value: 'A' },
