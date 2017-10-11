@@ -12,12 +12,7 @@
       #map { display: block; width: 100%; height: 300px; }
       .jumbotron { padding: 0px; }
       
-          <!-- added -->
-      img { 
-    max-width: inherit !important; 
-    box-shadow: inherit !important;
-} 
-          <!-- ---- CSS -->
+
       
       @media print {
         .search-container, #map { display: none; }
@@ -25,8 +20,14 @@
         table { width: 100%; }
       }
       
-          
-      
+          @media print {
+		  img {
+    max-width: auto !important;
+		  
+		  }
+		  
+		  
+		  
       /* Sticky footer styles
       -------------------------------------------------- */
       html {
