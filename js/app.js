@@ -132,10 +132,10 @@ var styles = {
   siteClasses = [
     { name: 'A - Hard Rock', value: 'A' },
     { name: 'B - Rock', value: 'B' },
-    { name: 'B - Estimated (see Section 11.4.3)', value: 'B-estimated', hide_in_ref },
+    { name: 'B - Estimated (see Section 11.4.3)', value: 'B-estimated', hide_in_ref[] },
     { name: 'C - Very Dense Soil and Soft Rock', value: 'C' },
     { name: 'D - Stiff Soil', value: 'D' },
-    { name: 'D - Default (See Section 11.4.3)', value: 'D-default', hide_in_ref},
+    { name: 'D - Default (See Section 11.4.3)', value: 'D-default', hide_in_ref[]},
     { name: 'E - Soft Clay Soil', value: 'E' },
     { name: 'F - Site Response Analysis', value: 'F' }
   ];
